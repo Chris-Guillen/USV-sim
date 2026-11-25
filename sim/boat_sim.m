@@ -198,11 +198,17 @@ for j = 1:numel(idx)
     pause(0.03);
   else
     frame = getframe(fig);
-    [im, map] = rgb2ind(frame.cdata, 128);
-    if j == 1
-      imwrite(im, map, gif_file, 'gif', 'LoopCount', Inf, 'DelayTime', 0.05);
+    if exist('OCTAVE_VERSION', 'builtin')
+      % Octave's rgb2ind has no colour-count option; its imwrite takes RGB.
+      args = {frame.cdata};
     else
-      imwrite(im, map, gif_file, 'gif', 'WriteMode', 'append', 'DelayTime', 0.05);
+      [im, map] = rgb2ind(frame.cdata, 128);   % MATLAB: GIF needs indexed colour
+      args = {im, map};
+    end
+    if j == 1
+      imwrite(args{:}, gif_file, 'gif', 'LoopCount', Inf, 'DelayTime', 0.05);
+    else
+      imwrite(args{:}, gif_file, 'gif', 'WriteMode', 'append', 'DelayTime', 0.05);
     end
   end
 end
